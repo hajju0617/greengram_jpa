@@ -4,6 +4,7 @@ import com.green.greengram.common.AppProperties;
 import com.green.greengram.common.CookieUtils;
 import com.green.greengram.common.CustomFileUtils;
 import com.green.greengram.common.MyCommonUtils;
+import com.green.greengram.entity.User;
 import com.green.greengram.exception.CustomException;
 import com.green.greengram.exception.MemberErrorCode;
 import com.green.greengram.security.*;
@@ -37,27 +38,37 @@ public class UserServiceImpl implements UserService {
     private final CookieUtils cookieUtils;
     private final AuthenticationFacade authenticationFacade;
     private final AppProperties appProperties;
+    private final UserRepository repository;
 
     // SecurityContextHolder -> Context -> Authentication(UsernamePasswordAuthenticationToken) -> MyUserDetails -> MyUser
     // UsernamePasswordAuthenticationToken 여기에 값이 있어야 인증 됐다라는 의미 (JwtTokenProviderVw 103라인)
 
     @Transactional
     public int postSignUp(MultipartFile pic, SignUpPostReq p) {
-        log.info("pic : {}",pic);
+
         p.setProviderType(SignInProviderType.LOCAL);
         String saveFileName = customFileUtils.makeRandomFileName(pic);
-        log.info("saveFileName : {}",saveFileName);
+
         p.setPic(saveFileName);
 
         String password = passwordEncoder.encode(p.getUpw());
 //        String hashedPw = BCrypt.hashpw(p.getUpw(), BCrypt.gensalt());
         p.setUpw(password);
 
-        int result = mapper.postUser(p);
+        User user = new User(); // User 엔터티 직접 객체 생성 (영속성이 없는 상태)
+        user.setUid(p.getUid());
+        user.setUpw(password);
+        user.setNm(p.getNm());
+        user.setPic(saveFileName);
+        user.setProviderType(SignInProviderType.LOCAL);
+
+        repository.save(user);      // save( 엔터티 주소값 )
+
+//        int result = mapper.postUser(p);
         log.info("p : {}", p);
 
         if(pic == null) {
-            return result;
+            return 0;
         }
         try {
             String path = String.format("user/%d", p.getUserId());
@@ -72,7 +83,7 @@ public class UserServiceImpl implements UserService {
             e.printStackTrace();
             throw new RuntimeException("파일 저장 오류");
         }
-        return result;
+        return 1;
     }
 
     public SignInRes postSignIn(HttpServletResponse res, SignInPostReq p) {
