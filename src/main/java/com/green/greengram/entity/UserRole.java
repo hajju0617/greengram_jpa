@@ -1,7 +1,11 @@
 package com.green.greengram.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 @Table(
         uniqueConstraints = {   // uniqueConstraints 속성은 유니크 제약 조건을 설정
