@@ -12,7 +12,7 @@ import org.apache.ibatis.annotations.Many;
         uniqueConstraints = {   // uniqueConstraints 속성은 유니크 제약 조건을 설정
                 @UniqueConstraint(
                         columnNames = {"from_user_id", "to_user_id"}    // columnNames 속성은 유니크 제약 조건이 적용될 컬럼 이름들을 지정
-                )
+                )                                                       // from_user_id, to_user_id 은 복합키
         }
 )   // JPA 엔티티 클래스에 특정 컬럼 조합에 대해 유니크 제약 조건을 설정
     // from_user_id와 to_user_id의 조합이 중복되는 것을 방지
@@ -25,10 +25,10 @@ public class UserFollow {
     private Long userFollowId;
 
     @ManyToOne      // Many(UserFollow) To One(User)
-    @JoinColumn(name = "from_user_id")  // 조인 컬럼명 (컬럼명이 됨)
+    @JoinColumn(name = "from_user_id", nullable = false)  // name = 조인 컬럼명 (컬럼명이 됨)
     private User fromUser;
 
     @ManyToOne
-    @JoinColumn(name = "to_user_id")
+    @JoinColumn(name = "to_user_id", nullable = false)
     private User toUser;
 }

@@ -10,7 +10,7 @@ import lombok.Setter;
 public class MainCode {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Autoincrement
     private Long mainCodeId;
 
     @Column(length = 20, nullable = false)

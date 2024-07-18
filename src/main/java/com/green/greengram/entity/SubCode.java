@@ -19,7 +19,7 @@ public class SubCode {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long subCodeId;
 
-    @ManyToOne
+    @ManyToOne  // many : 나 자신, one : 상대방   ( N : 1 )
     @JoinColumn(name = "main_code_id", nullable = false)
     private MainCode mainCode;
 

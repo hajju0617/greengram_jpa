@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 @Setter
 @Getter
-@MappedSuperclass   // 부모클래스랑 맵핑 가능하게 해줌
+@MappedSuperclass   // 부모클래스랑 맵핑 가능하게 해줌 (상속으로 사용 가능하게)
 @EntityListeners(AuditingEntityListener.class)  //JPA 엔티티 클래스에 적용되는 애너테이션
                                                 // 엔티티의 생명주기 이벤트를 감지하고 감사(auditing) 기능을 제공하기 위해 사용됨.
                                                 // 주로 데이터의 생성 및 수정 시간을 자동으로 기록하는 데 사용
