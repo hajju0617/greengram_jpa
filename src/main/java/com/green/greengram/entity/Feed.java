@@ -11,7 +11,7 @@ public class Feed extends UpdatedAt {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long FeedId;
+    private Long feedId;
 
     @ManyToOne
     @JoinColumn(name = "writer_id", nullable = false)
@@ -21,7 +21,7 @@ public class Feed extends UpdatedAt {
     private String contents;
 
     @Column(length = 30)
-    private String location
+    private String location;
 
 
 }

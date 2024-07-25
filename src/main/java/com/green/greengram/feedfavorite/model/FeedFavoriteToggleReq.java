@@ -2,6 +2,7 @@ package com.green.greengram.feedfavorite.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import java.beans.ConstructorProperties;
@@ -11,13 +12,13 @@ import java.beans.ConstructorProperties;
 @ToString
 public class FeedFavoriteToggleReq {
 
+    @Schema(name = "feed_id")
+    private long feedId; //feed_id
+
     @JsonIgnore
-    private long userId;
+    private long userId; //user_id
 
-
-    private long feedId;
-
-    @ConstructorProperties({"feed_id"})
+    @ConstructorProperties({" feed_id "})
     public FeedFavoriteToggleReq(long feedId) {
         this.feedId = feedId;
     }

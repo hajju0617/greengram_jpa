@@ -5,6 +5,7 @@ import com.green.greengram.common.CookieUtils;
 import com.green.greengram.common.CustomFileUtils;
 import com.green.greengram.common.MyCommonUtils;
 import com.green.greengram.entity.User;
+import com.green.greengram.entity.UserRole;
 import com.green.greengram.exception.CustomException;
 import com.green.greengram.exception.MemberErrorCode;
 import com.green.greengram.security.*;
@@ -23,9 +24,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.green.greengram.exception.MemberErrorCode.INCORRECT_ID_PW;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -39,6 +43,7 @@ public class UserServiceImpl implements UserService {
     private final AuthenticationFacade authenticationFacade;
     private final AppProperties appProperties;
     private final UserRepository repository;
+    private final UserRoleRepository userRoleRepository;
 
     // SecurityContextHolder -> Context -> Authentication(UsernamePasswordAuthenticationToken) -> MyUserDetails -> MyUser
     // UsernamePasswordAuthenticationToken 여기에 값이 있어야 인증 됐다라는 의미 (JwtTokenProviderVw 103라인)
@@ -71,7 +76,7 @@ public class UserServiceImpl implements UserService {
             return 0;
         }
         try {
-            String path = String.format("user/%d", p.getUserId());
+            String path = String.format("user/%d", user.getUserId());
             customFileUtils.makeFolders(path);
             log.info("path : {}", path);
 
@@ -87,19 +92,25 @@ public class UserServiceImpl implements UserService {
     }
 
     public SignInRes postSignIn(HttpServletResponse res, SignInPostReq p) {
-        p.setProviderType(SignInProviderType.LOCAL.name());
-        List<UserInfo> userInfoList = mapper.getUserById(p);
-
-        UserInfoRoles userInfoRoles = MyCommonUtils.convertToUserInfoRoles(userInfoList);
-
-        if (userInfoRoles == null || !passwordEncoder.matches(p.getUpw(), userInfoRoles.getUpw())) {
+//        p.setProviderType(SignInProviderType.LOCAL.name());
+        // 1. 내가 시도하는 select 2번
+        log.info("aaa");
+        User user = repository.getUserByProviderTypeAndUid(SignInProviderType.LOCAL, p.getUid());
+        if(user == null || !(passwordEncoder.matches(p.getUpw(), user.getUpw()))) { // 아이디가 없거나 비밀번호가 틀렸거나
             throw new CustomException(MemberErrorCode.INCORRECT_ID_PW);
         }
+        List<UserRole> userRoleList = userRoleRepository.findAllByUser(user);
+        List<String> roles = new ArrayList<>();
+        for(UserRole userRole : userRoleList) {     // String 타입을 변환
+            roles.add(userRole.getRole());
+        }
+
+        // 2. 내가 시도하는 select 1번
 
 
         MyUser myUser = MyUser.builder()
-                .userId(userInfoRoles.getUserId())   // pk값 담고
-                .roles(userInfoRoles.getRoles())          // 권한 담음
+                .userId(user.getUserId())   // pk값 담고
+                .roles(roles)          // 권한 담음  ( roles : List<String> roles)
                 .build();
         // => 빌더 패턴으로 객체 생성
 
@@ -118,9 +129,9 @@ public class UserServiceImpl implements UserService {
         cookieUtils.setCookie(res, appProperties.getJwt().getRefreshTokenCookieName(), refreshToken, refreshTokenMaxAge);
 
         return SignInRes.builder()
-                .userId(userInfoRoles.getUserId())   // 프로필 사진을 띄울때 사용 (프로필 사진 주소에 pk 값이 포함 됨)
-                .nm(userInfoRoles.getNm())
-                .pic(userInfoRoles.getPic())
+                .userId(user.getUserId())   // 프로필 사진을 띄울때 사용 (프로필 사진 주소에 pk 값이 포함 됨)
+                .nm(user.getNm())
+                .pic(user.getPic())
                 .accessToken(accessToken)   // 응답으로 바로 프론트한테 보내준다
                 .build();
     }
@@ -153,14 +164,17 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     public String patchProfilePic(UserProfilePatchReq p) {  // 기존  폴더 삭제
-        p.setSignedUserId(authenticationFacade.getLoginUserId());
+        long signedUserId = authenticationFacade.getLoginUserId();
 
         String fileNm = customFileUtils.makeRandomFileName(p.getPic()); // 랜덤 파일명 얻어와서 fileNm에 저장
         p.setPicName(fileNm);
-        mapper.updProfilePic(p);
+        User user = repository.getReferenceById(signedUserId); // 영속성이 있는 user entity 생성
+        user.setPic(fileNm);
+//        mapper.updProfilePic(p);
+        repository.save(user);
 
         try {
-            String midPath = String.format("user/%d", p.getSignedUserId());
+            String midPath = String.format("user/%d", signedUserId);
 //    //        String folderPath = customFileUnits.uploadPath + "/user/" + p.getSignedUserId();
 //            String folderPath = String.format("%s/user/%d", customFileUtils.uploadPath, p.getSignedUserId());
 //            // + 기호를 쓰기 싫다면 이렇게 수정

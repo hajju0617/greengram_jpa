@@ -20,8 +20,6 @@ public class AppProperties {
         // 멤버필드명은 application.yaml 의 app/jwt/* 속성명과 매칭
         // application.yaml 에서 '-'는 멤버필드에서 카멜케이스 기법과 매칭
 
-
-
         private String secret;                  // secret
         private String headerSchemaName;        // header-schema-name
         private String tokenType;               // token-type

@@ -18,7 +18,7 @@ import org.apache.ibatis.annotations.Many;
     // from_user_id와 to_user_id의 조합이 중복되는 것을 방지
     // 유니크 제약 조건을 설정하면, 동일한 from_user_id와 to_user_id의 조합이 두 번 이상 입력되지 않도록 보장
 
-public class UserFollow {
+public class UserFollow extends CreatedAt {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
