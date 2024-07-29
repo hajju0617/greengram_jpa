@@ -26,11 +26,16 @@ public class FeedCommentControllerImpl implements FeedCommentController {
     private final ObjectMapper om;
 
 
+    /*
+        HttpServletRequest (이하 Req), HttpServletResponse (이하 Res), Client (서버에게 요청을 보내는 EndUser)
+        Req : 요청에 관련된 모든 정보가 담겨져 있는 객체 ( Client의 IP주소, 사용하는 브라우저 엔진, OS, URL, 쿼리스트링, Body, Header 어떤 데이터가 담겨져 있는 지 등등)
+        Res : 서버가 응답을 할 때 사용할 객체
+     */
     @PostMapping
     public void postFeedComment(HttpServletResponse res, @RequestBody FeedCommentPostReq p) throws IOException {
         log.info("p: {}", p);
-        //long result = service.postFeedComment(p);
-        long result = 10;
+        long result = service.postFeedComment(p);
+
 
 
         MyResponse<Long> obj = MyResponse.<Long>builder()
@@ -38,8 +43,9 @@ public class FeedCommentControllerImpl implements FeedCommentController {
                 .resultMsg("응~ 댓글~")
                 .resultData(result)
                 .build();
+//        return obj;
 
-        String json = om.writeValueAsString(obj);
+        String json = om.writeValueAsString(obj);   // 객체 -> JSON 문자열로
 
         res.resetBuffer();
         res.setStatus(200);

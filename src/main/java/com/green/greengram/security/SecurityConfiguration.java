@@ -15,6 +15,7 @@ import org.springframework.security.config.oauth2.client.CommonOAuth2Provider;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -37,6 +38,8 @@ public class SecurityConfiguration {
     private final MyOAuth2UserService myOAuth2UserService;
     private final AppProperties appProperties;
     private final OAuth2AuthenticationCheckRedirectUriFilter oAuth2AuthenticationCheckRedirectUriFilter;
+    private final AuthenticationEntryPoint authenticationEntryPoint;
+    private final JwtAuthenticationAccessDeniedHandler jwtAuthenticationAccessDeniedHandler;
 
     /*
      메서드 빈 등록으로 주로 쓰는 케이스는 (현재 기준으로 설명하면)
@@ -131,8 +134,8 @@ public class SecurityConfiguration {
 
                 ).addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 // UsernamePasswordAuthenticationFilter.class 이전에 jwtAuthenticationFilter 해당 필터를 위치해준다는 뜻
-                .exceptionHandling(exception -> exception.authenticationEntryPoint(new JwtAuthenticationEntryPoint())
-                                                         .accessDeniedHandler(new JwtAuthenticationAccessDeniedHandler())
+                    .exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPoint)
+                                                         .accessDeniedHandler(jwtAuthenticationAccessDeniedHandler)
                 )
                 .oauth2Login( oauth2 -> oauth2.authorizationEndpoint(
                         auth -> auth.baseUri( appProperties.getOauth2().getBaseUri() ) // ""주소값 프론트한테 알려주기
