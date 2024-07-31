@@ -32,9 +32,4 @@ public class User extends UpdatedAt {
 
     @Column(length = 200)
     private String pic;
-
-
-
-
-
 }

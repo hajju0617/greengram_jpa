@@ -6,10 +6,10 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode
 public class FeedCommentGetRes {
-    private long feedCommentId;
+    private Long feedCommentId;
     private String comment;
     private String createdAt;
-    private long writerId;
+    private Long writerId;
     private String writerNm;
     private String writerPic;
 }

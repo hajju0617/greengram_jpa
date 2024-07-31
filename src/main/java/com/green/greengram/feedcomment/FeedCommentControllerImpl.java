@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.green.greengram.common.model.MyResponse;
 import com.green.greengram.feedcomment.model.FeedCommentDeleteReq;
 import com.green.greengram.feedcomment.model.FeedCommentGetRes;
+import com.green.greengram.feedcomment.model.FeedCommentGetResInterface;
 import com.green.greengram.feedcomment.model.FeedCommentPostReq;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -68,11 +69,22 @@ public class FeedCommentControllerImpl implements FeedCommentController {
 //    }
 
 
-    @GetMapping
-    public MyResponse<List<FeedCommentGetRes>> getFeedCommentList(@RequestParam(name="feed_id") long feedId) {
-        List<FeedCommentGetRes> list = service.getFeedComment(feedId); //4~N
+//    @GetMapping
+//    public MyResponse<List<FeedCommentGetRes>> getFeedCommentList(@RequestParam(name="feed_id") long feedId) {
+//        List<FeedCommentGetRes> list = service.getFeedComment(feedId); //4~N
+//
+//        return MyResponse.<List<FeedCommentGetRes>>builder()
+//                .statusCode(HttpStatus.OK)
+//                .resultMsg(String.format("rows: %,d", list.size()))
+//                .resultData(list)
+//                .build();
+//    }
 
-        return MyResponse.<List<FeedCommentGetRes>>builder()
+    @GetMapping         // jpa로 댓글 3개 이상일 경우 그 이후의 댓글 더 보기
+    public MyResponse<List<FeedCommentGetResInterface>> getFeedCommentList(@RequestParam (name = "feed_id") long feedId) {
+        List<FeedCommentGetResInterface> list = service.feedCommentListGet(feedId);
+
+        return MyResponse.<List<FeedCommentGetResInterface>>builder()
                 .statusCode(HttpStatus.OK)
                 .resultMsg(String.format("rows: %,d", list.size()))
                 .resultData(list)

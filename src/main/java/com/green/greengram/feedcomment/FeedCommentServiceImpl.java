@@ -8,6 +8,7 @@ import com.green.greengram.exception.MemberErrorCode;
 import com.green.greengram.feed.FeedRepository;
 import com.green.greengram.feedcomment.model.FeedCommentDeleteReq;
 import com.green.greengram.feedcomment.model.FeedCommentGetRes;
+import com.green.greengram.feedcomment.model.FeedCommentGetResInterface;
 import com.green.greengram.feedcomment.model.FeedCommentPostReq;
 import com.green.greengram.security.AuthenticationFacade;
 import com.green.greengram.user.UserRepository;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -63,7 +65,30 @@ public class FeedCommentServiceImpl implements FeedCommentService {
 //        return mapper.deleteFeedComment(p);
     }
 
-    public List<FeedCommentGetRes> getFeedComment(long feedId) {
-        return mapper.selFeedCommentList(feedId);
+//    public List<FeedCommentGetRes> getFeedComment(long feedId) {    // jpa로 모든 댓글 다 불러오기
+//        Feed feed = new Feed();
+//        feed.setFeedId(feedId);
+//        List<FeedComment> list = repository.findAllFeedCommentByFeedOrderByFeedCommentId(feed);
+//
+//        List<FeedCommentGetRes> results = new ArrayList<>();
+//        for(FeedComment feedComment : list) {
+//            FeedCommentGetRes item = new FeedCommentGetRes();
+//            results.add(item);
+//
+//            item.setFeedCommentId(feedComment.getFeedCommentId());
+//            item.setComment(feedComment.getComment());
+//            item.setCreatedAt(feedComment.getCreatedAt().toString());
+//            item.setWriterId(feedComment.getUser().getUserId());
+//            item.setWriterNm(feedComment.getUser().getNm());
+//            item.setWriterPic(feedComment.getUser().getPic());
+//        }
+//        return results;
+//
+////        return mapper.selFeedCommentList(feedId);
+//    }
+
+
+    public List<FeedCommentGetResInterface> feedCommentListGet(long feedId) {   // jpa로 댓글 3개 이상일 경우 그 이후의 댓글 더 보기
+        return repository.findAllByFeedCommentLimit3AndInfinity(feedId);
     }
 }
